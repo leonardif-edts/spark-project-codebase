@@ -1,0 +1,57 @@
+version: "3.4"
+
+x-spark-build:
+  &spark-common-build
+  build: ./services/spark
+  environment:
+    &spark-common-env
+    SPARK_MASTER_PORT: ${SPARK_MASTER_PORT}
+    SPARK_MASTER_WEBUI_PORT: ${SPARK_MASTER_WEBUI_PORT}
+    SPARK_MASTER_HOST: ${SPARK_MASTER_HOST}
+    SPARK_WORKER_WEBUI_PORT: ${SPARK_WORKER_WEBUI_PORT}
+    SPARK_WORKER_PORT: ${SPARK_WORKER_PORT}
+    SPARK_LOG_DIR: ${SPARK_LOG_DIR}
+    SPARK_MASTER_LOG: ${SPARK_MASTER_LOG}
+    SPARK_WORKER_LOG: ${SPARK_WORKER_LOG}
+    SPARK_TMP_DIR: ${SPARK_TMP_DIR}
+    SPARK_TMP_CODE_DIR: ${SPARK_TMP_CODE_DIR}
+    SPARK_TMP_RESULT_DIR: ${SPARK_TMP_RESULT_DIR}
+
+  volumes:
+    - ./project:${SPARK_HOME}/work/project
+    - ./services/spark/:${SPARK_HOME}/work/cluster
+    - ./tmp:${SPARK_TMP_DIR}
+    - ./services/spark/spark-defaults.conf:${SPARK_HOME}/conf/spark-defaults.conf
+
+services:
+  spark-master:
+    <<: *spark-common-build
+    environment:
+      <<: *spark-common-env
+      SPARK_WORKLOAD: "master"
+      SPARK_LOCAL_IP: "spark-master"
+    ports:
+      - "9090:${SPARK_MASTER_WEBUI_PORT}"
+      - "7077:${SPARK_MASTER_PORT}"
+  
+  spark-worker:
+    <<: *spark-common-build
+    environment:
+      <<: *spark-common-env
+      SPARK_WORKLOAD: "worker"
+      SPARK_WORKER: 1
+      SPARK_WORKER_MEMORY: "1G"
+      SPARK_DRIVER_MEMORY: "1G"
+      SPARK_EXECUTOR_MEMORY: "1G"
+    ports:
+      - "9091:${SPARK_WORKER_WEBUI_PORT}"
+      - "7000:${SPARK_WORKER_PORT}"
+    depends_on:
+      - spark-master
+  
+  spark-submit:
+    <<: *spark-common-build
+    environment:
+      <<: *spark-common-env
+      SPARK_WORKLOAD: "submit"
+    command: ["sleep", "infinity"] 
