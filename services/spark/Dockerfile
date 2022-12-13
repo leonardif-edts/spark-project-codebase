@@ -6,6 +6,11 @@ RUN apt-get update && \
 
 USER 1001
 
+ENV SPARK_HOME=/opt/bitnami/spark
+ENV SPARK_TMP_DIR=$SPARK_HOME/work/tmp
+ENV SPARK_TMP_CODE_DIR=$SPARK_TMP_DIR/code
+ENV SPARK_TMP_RESULT_DIR=$SPARK_TMP_DIR/result
+
 WORKDIR /opt/bitnami/spark/work
 COPY startup.sh cluster/startup.sh
 
