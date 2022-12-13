@@ -7,6 +7,6 @@ RUN apt-get update && \
 USER 1001
 
 WORKDIR /opt/bitnami/spark/work
-COPY startup.sh cluster/
+COPY startup.sh cluster/startup.sh
 
 CMD ["/bin/bash", "cluster/startup.sh"]
